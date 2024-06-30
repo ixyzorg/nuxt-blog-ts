@@ -1,0 +1,29 @@
+name: scp files
+on: 
+  push:
+    branches:
+      - dev
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: scp ssh pipelines
+      uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+      env:
+        LASTSSH: "SCP完成后重新部署项目"
+      with:
+        host: ${{ secrets.HOST }}
+        user: ${{ secrets.USERNAME }}
+        pass: ${{ secrets.PASSWORD }}
+        scp: |
+          ./* => /project/nuxt-blog-ts
+        last_ssh: |
+          echo $LASTSSH 
+          cd /project/nuxt-blog-ts
+          source ~/.nvm/nvm.sh 
+          yarn install
+          yarn run build
+          pm2 restart ecosystem.config.cjs
